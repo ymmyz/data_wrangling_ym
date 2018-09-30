@@ -1,0 +1,27 @@
+---
+title: "Data Manipulation"
+author: "ymmyz"
+date: "9/30/2018"
+output: html_document
+---
+
+```{r pacakge_setup, include=FALSE}
+library(tidyverse)
+```
+
+## Import FAS csv file
+
+Import my first two csv.
+
+```{r}
+options(tibble.print_min = 3)
+
+litters_data = read_csv("./data/FAS_litters.csv",
+  col_types = "ccddiiii")
+litters_data = janitor::clean_names(litters_data)
+
+pups_data = read_csv("./data/FAS_pups.csv",
+  col_types = "ciiiii")
+pus_data = janitor::clean_names(pups_data)
+
+```
