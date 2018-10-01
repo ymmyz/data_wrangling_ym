@@ -11,7 +11,7 @@ library(tidyverse)
 
 ## Import FAS csv file
 
-Import my first two csv.
+Import my two csv files.
 
 ```{r}
 options(tibble.print_min = 3)
@@ -22,6 +22,63 @@ litters_data = janitor::clean_names(litters_data)
 
 pups_data = read_csv("./data/FAS_pups.csv",
   col_types = "ciiiii")
-pus_data = janitor::clean_names(pups_data)
+pups_data = janitor::clean_names(pups_data)
 
 ```
+
+## Select Variables
+
+```{r}
+select(litters_data, group, litter_number, gd0_weight)
+
+select(litters_data, litter_number, gd0_weight, pups_survive)
+```
+
+... by specifying a range
+
+```{r}
+select(litters_data, gd_of_birth:pups_survive) #gd_of_birth to pups_survive
+select(litters_data, group, gd_of_birth:pups_survive)
+```
+
+... by saying what you want to remove
+
+```{r}
+select(litters_data, -litter_number)   #remove litter_number
+```
+
+
+```{r}
+select(litters_data, group, litter_number, gest_day_0_weight = gd0_weight) #select and rename ge0_weight as gest_day_0_weight
+
+rename(litters_data, gest_day_0_weight = gd0_weight) #rename only, with the all data set
+```
+
+...use select helpers
+
+```{r}
+select(litters_data, starts_with("gd"))
+
+select(litters_data, litter_number, starts_with("pup"))
+
+select(litters_data, litter_number, everything()) #litter number in the column, then everything else
+```
+
+## Learning Assessment 1 -  select the columns containing litter number, sex, and PD ears in pups data
+
+```{r}
+select(pups_data, litter_number, sex, pd_ears)
+```
+
+
+## Filter Variables and learning assessment
+```{r}
+filter(litters_data, gd0_weight < 25)
+
+filter(pups_data, sex == 1)
+filter(pups_data, pd_walk < 11, sex == 2)
+```
+
+
+
+

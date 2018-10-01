@@ -130,7 +130,7 @@ $(document).ready(function () {
 
 <div id="import-fas-csv-file" class="section level2">
 <h2>Import FAS csv file</h2>
-<p>Import my first two csv.</p>
+<p>Import my two csv files.</p>
 <pre class="r"><code>options(tibble.print_min = 3)
 
 litters_data = read_csv(&quot;./data/FAS_litters.csv&quot;,
@@ -139,7 +139,106 @@ litters_data = janitor::clean_names(litters_data)
 
 pups_data = read_csv(&quot;./data/FAS_pups.csv&quot;,
   col_types = &quot;ciiiii&quot;)
-pus_data = janitor::clean_names(pups_data)</code></pre>
+pups_data = janitor::clean_names(pups_data)</code></pre>
+</div>
+<div id="select-variables" class="section level2">
+<h2>Select Variables</h2>
+<pre class="r"><code>select(litters_data, group, litter_number, gd0_weight)</code></pre>
+<pre><code>## # A tibble: 49 x 3
+##   group litter_number gd0_weight
+##   &lt;chr&gt; &lt;chr&gt;              &lt;dbl&gt;
+## 1 Con7  #85                 19.7
+## 2 Con7  #1/2/95/2           27  
+## 3 Con7  #5/5/3/83/3-3       26  
+## # ... with 46 more rows</code></pre>
+<pre class="r"><code>select(litters_data, litter_number, gd0_weight, pups_survive)</code></pre>
+<pre><code>## # A tibble: 49 x 3
+##   litter_number gd0_weight pups_survive
+##   &lt;chr&gt;              &lt;dbl&gt;        &lt;int&gt;
+## 1 #85                 19.7            3
+## 2 #1/2/95/2           27              7
+## 3 #5/5/3/83/3-3       26              5
+## # ... with 46 more rows</code></pre>
+<p>… by specifying a range</p>
+<pre class="r"><code>select(litters_data, gd_of_birth:pups_survive) #gd_of_birth to pups_survive</code></pre>
+<pre><code>## # A tibble: 49 x 4
+##   gd_of_birth pups_born_alive pups_dead_birth pups_survive
+##         &lt;int&gt;           &lt;int&gt;           &lt;int&gt;        &lt;int&gt;
+## 1          20               3               4            3
+## 2          19               8               0            7
+## 3          19               6               0            5
+## # ... with 46 more rows</code></pre>
+<pre class="r"><code>select(litters_data, group, gd_of_birth:pups_survive)</code></pre>
+<pre><code>## # A tibble: 49 x 5
+##   group gd_of_birth pups_born_alive pups_dead_birth pups_survive
+##   &lt;chr&gt;       &lt;int&gt;           &lt;int&gt;           &lt;int&gt;        &lt;int&gt;
+## 1 Con7           20               3               4            3
+## 2 Con7           19               8               0            7
+## 3 Con7           19               6               0            5
+## # ... with 46 more rows</code></pre>
+<p>… by saying what you want to remove</p>
+<pre class="r"><code>select(litters_data, -litter_number)   #remove litter_number</code></pre>
+<pre><code>## # A tibble: 49 x 7
+##   group gd0_weight gd18_weight gd_of_birth pups_born_alive pups_dead_birth
+##   &lt;chr&gt;      &lt;dbl&gt;       &lt;dbl&gt;       &lt;int&gt;           &lt;int&gt;           &lt;int&gt;
+## 1 Con7        19.7        34.7          20               3               4
+## 2 Con7        27          42            19               8               0
+## 3 Con7        26          41.4          19               6               0
+## # ... with 46 more rows, and 1 more variable: pups_survive &lt;int&gt;</code></pre>
+<pre class="r"><code>select(litters_data, group, litter_number, gest_day_0_weight = gd0_weight) #select and rename ge0_weight as gest_day_0_weight</code></pre>
+<pre><code>## # A tibble: 49 x 3
+##   group litter_number gest_day_0_weight
+##   &lt;chr&gt; &lt;chr&gt;                     &lt;dbl&gt;
+## 1 Con7  #85                        19.7
+## 2 Con7  #1/2/95/2                  27  
+## 3 Con7  #5/5/3/83/3-3              26  
+## # ... with 46 more rows</code></pre>
+<pre class="r"><code>rename(litters_data, gest_day_0_weight = gd0_weight) #rename only, with the all data set</code></pre>
+<pre><code>## # A tibble: 49 x 8
+##   group litter_number gest_day_0_weig… gd18_weight gd_of_birth
+##   &lt;chr&gt; &lt;chr&gt;                    &lt;dbl&gt;       &lt;dbl&gt;       &lt;int&gt;
+## 1 Con7  #85                       19.7        34.7          20
+## 2 Con7  #1/2/95/2                 27          42            19
+## 3 Con7  #5/5/3/83/3-3             26          41.4          19
+## # ... with 46 more rows, and 3 more variables: pups_born_alive &lt;int&gt;,
+## #   pups_dead_birth &lt;int&gt;, pups_survive &lt;int&gt;</code></pre>
+<p>…use select helpers</p>
+<pre class="r"><code>select(litters_data, starts_with(&quot;gd&quot;))</code></pre>
+<pre><code>## # A tibble: 49 x 3
+##   gd0_weight gd18_weight gd_of_birth
+##        &lt;dbl&gt;       &lt;dbl&gt;       &lt;int&gt;
+## 1       19.7        34.7          20
+## 2       27          42            19
+## 3       26          41.4          19
+## # ... with 46 more rows</code></pre>
+<pre class="r"><code>select(litters_data, litter_number, starts_with(&quot;pup&quot;))</code></pre>
+<pre><code>## # A tibble: 49 x 4
+##   litter_number pups_born_alive pups_dead_birth pups_survive
+##   &lt;chr&gt;                   &lt;int&gt;           &lt;int&gt;        &lt;int&gt;
+## 1 #85                         3               4            3
+## 2 #1/2/95/2                   8               0            7
+## 3 #5/5/3/83/3-3               6               0            5
+## # ... with 46 more rows</code></pre>
+<pre class="r"><code>select(litters_data, litter_number, everything()) #litter number in the column, then everything else</code></pre>
+<pre><code>## # A tibble: 49 x 8
+##   litter_number group gd0_weight gd18_weight gd_of_birth pups_born_alive
+##   &lt;chr&gt;         &lt;chr&gt;      &lt;dbl&gt;       &lt;dbl&gt;       &lt;int&gt;           &lt;int&gt;
+## 1 #85           Con7        19.7        34.7          20               3
+## 2 #1/2/95/2     Con7        27          42            19               8
+## 3 #5/5/3/83/3-3 Con7        26          41.4          19               6
+## # ... with 46 more rows, and 2 more variables: pups_dead_birth &lt;int&gt;,
+## #   pups_survive &lt;int&gt;</code></pre>
+</div>
+<div id="learning-assessment-1---select-the-columns-containing-litter-number-sex-and-pd-ears-in-pups-data" class="section level2">
+<h2>Learning Assessment 1 - select the columns containing litter number, sex, and PD ears in pups data</h2>
+<pre class="r"><code>select(pups_data, litter_number, sex, pd_ears)</code></pre>
+<pre><code>## # A tibble: 313 x 3
+##   litter_number   sex pd_ears
+##   &lt;chr&gt;         &lt;int&gt;   &lt;int&gt;
+## 1 #85               1       4
+## 2 #85               1       4
+## 3 #1/2/95/2         1       5
+## # ... with 310 more rows</code></pre>
 </div>
 
 
