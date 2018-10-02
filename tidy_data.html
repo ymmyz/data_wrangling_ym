@@ -128,7 +128,101 @@ $(document).ready(function () {
 </div>
 
 
+<div id="gather" class="section level2">
+<h2>Gather</h2>
+<p>PULSE data</p>
+<pre class="r"><code>pulse_data = haven::read_sas(&quot;./data/public_pulse_data.sas7bdat&quot;) %&gt;%
+  janitor::clean_names()
+pulse_data</code></pre>
+<pre><code>## # A tibble: 1,087 x 7
+##       id   age sex  bdi_score_bl bdi_score_01m bdi_score_06m bdi_score_12m
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;ch&gt;        &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;
+##  1 10003  48.0 male            7             1             2             0
+##  2 10015  72.5 male            6            NA            NA            NA
+##  3 10022  58.5 male           14             3             8            NA
+##  4 10026  72.7 male           20             6            18            16
+##  5 10035  60.4 male            4             0             1             2
+##  6 10050  84.7 male            2            10            12             8
+##  7 10078  31.3 male            4             0            NA            NA
+##  8 10088  56.9 male            5            NA             0             2
+##  9 10091  76.0 male            0             3             4             0
+## 10 10092  74.2 fem…           10             2            11             6
+## # ... with 1,077 more rows</code></pre>
+<pre class="r"><code>pulse_tidy_data = gather(pulse_data, key = visit, value = bdi, bdi_score_bl:bdi_score_12m)</code></pre>
+<pre><code>## Warning: attributes are not identical across measure variables;
+## they will be dropped</code></pre>
+<p>Illustrate “stperate”</p>
+<pre class="r"><code>pulse_tidy_data %&gt;%
+  separate(visit, into = c(&quot;bdi_str&quot;, &quot;score_str&quot;, &quot;visit&quot;), sep = &quot;_&quot;) %&gt;% 
+  select(-bdi_str, -score_str) %&gt;% 
+  mutate(visit = replace(visit, visit == &quot;bl&quot;, &quot;00m&quot;))</code></pre>
+<pre><code>## # A tibble: 4,348 x 5
+##       id   age sex    visit   bdi
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt; &lt;dbl&gt;
+##  1 10003  48.0 male   00m       7
+##  2 10015  72.5 male   00m       6
+##  3 10022  58.5 male   00m      14
+##  4 10026  72.7 male   00m      20
+##  5 10035  60.4 male   00m       4
+##  6 10050  84.7 male   00m       2
+##  7 10078  31.3 male   00m       4
+##  8 10088  56.9 male   00m       5
+##  9 10091  76.0 male   00m       0
+## 10 10092  74.2 female 00m      10
+## # ... with 4,338 more rows</code></pre>
+<p>All together, the code will be:</p>
+<pre class="r"><code>pulse_df =
+  haven::read_sas(&quot;./data/public_pulse_data.sas7bdat&quot;) %&gt;%
+  janitor::clean_names() %&gt;% 
+  gather(key = &quot;visit&quot;, value = &quot;bdi_score&quot;, bdi_score_bl:bdi_score_12m) %&gt;%
+  separate(visit, into = c(&quot;bdi_str&quot;, &quot;score_str&quot;, &quot;visit&quot;), sep = &quot;_&quot;) %&gt;% 
+  select(-bdi_str, -score_str) %&gt;% 
+  mutate(visit = replace(visit, visit == &quot;bl&quot;, &quot;00m&quot;))</code></pre>
+<pre><code>## Warning: attributes are not identical across measure variables;
+## they will be dropped</code></pre>
+</div>
+<div id="in-class-assignment---litters_data-tidy" class="section level2">
+<h2>In-class assignment - litters_data tidy</h2>
+<pre class="r"><code>litters_data = read_csv(&quot;./data/FAS_litters.csv&quot;,
+                        col_types = &quot;ccddiiii&quot;) %&gt;%
+  janitor::clean_names() %&gt;% 
+  select(litter_number, gd0_weight, gd18_weight) %&gt;% 
+  gather(key = &quot;gd&quot;, value = &quot;wight&quot;, gd0_weight:gd18_weight) %&gt;% 
+  mutate(gd = replace(gd, gd == &quot;gd0_weight&quot;, &quot;0&quot;)) %&gt;% 
+  mutate(gd = replace(gd, gd == &quot;gd18_weight&quot;, &quot;18&quot;))</code></pre>
+</div>
+<div id="use-spread-to-untidy-your-data" class="section level2">
+<h2>Use “spread” to untidy your data</h2>
+<pre class="r"><code>analysis_result = tibble(
+  group = c(&quot;treatment&quot;, &quot;treatment&quot;, &quot;placebo&quot;, &quot;placebo&quot;),
+  time = c(&quot;pre&quot;, &quot;post&quot;, &quot;pre&quot;, &quot;post&quot;),
+  mean = c(4, 8, 3.5, 4)
+)
+spread(analysis_result, key = time, value = mean)</code></pre>
+<pre><code>## # A tibble: 2 x 3
+##   group      post   pre
+##   &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1 placebo       4   3.5
+## 2 treatment     8   4</code></pre>
+</div>
+<div id="binding-rows-from-different-tables" class="section level2">
+<h2>Binding rows from different tables</h2>
+<p>first we need to read all three tables</p>
+<pre class="r"><code>fellowship_ring = readxl::read_excel(&quot;./data/LotR_Words.xlsx&quot;, range = &quot;B3:D6&quot;) %&gt;%
+  mutate(movie = &quot;fellowship_ring&quot;)
 
+two_towers = readxl::read_excel(&quot;./data/LotR_Words.xlsx&quot;, range = &quot;F3:H6&quot;) %&gt;%
+  mutate(movie = &quot;two_towers&quot;)
+
+return_king = readxl::read_excel(&quot;./data/LotR_Words.xlsx&quot;, range = &quot;J3:L6&quot;) %&gt;%
+  mutate(movie = &quot;return_king&quot;)</code></pre>
+<p>it’s time to bind them</p>
+<pre class="r"><code>lotr_tidy = bind_rows(fellowship_ring, two_towers, return_king) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  gather(key = sex, value = words, female:male) %&gt;% 
+  mutate(race = tolower(race)) %&gt;% 
+  select(movie, everything())</code></pre>
+</div>
 
 
 

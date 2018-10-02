@@ -9,3 +9,84 @@ output: html_document
 library(tidyverse)
 ```
 
+## Gather
+
+PULSE data
+```{r}
+pulse_data = haven::read_sas("./data/public_pulse_data.sas7bdat") %>%
+  janitor::clean_names()
+pulse_data
+```
+
+```{r}
+pulse_tidy_data = gather(pulse_data, key = visit, value = bdi, bdi_score_bl:bdi_score_12m)
+```
+
+ Illustrate "stperate"
+```{r}
+pulse_tidy_data %>%
+  separate(visit, into = c("bdi_str", "score_str", "visit"), sep = "_") %>% 
+  select(-bdi_str, -score_str) %>% 
+  mutate(visit = replace(visit, visit == "bl", "00m"))
+```
+
+All together, the code will be:
+```{r}
+pulse_df =
+  haven::read_sas("./data/public_pulse_data.sas7bdat") %>%
+  janitor::clean_names() %>% 
+  gather(key = "visit", value = "bdi_score", bdi_score_bl:bdi_score_12m) %>%
+  separate(visit, into = c("bdi_str", "score_str", "visit"), sep = "_") %>% 
+  select(-bdi_str, -score_str) %>% 
+  mutate(visit = replace(visit, visit == "bl", "00m"))
+```
+
+
+## In-class assignment - litters_data tidy
+```{r}
+litters_data = read_csv("./data/FAS_litters.csv",
+                        col_types = "ccddiiii") %>%
+  janitor::clean_names() %>% 
+  select(litter_number, gd0_weight, gd18_weight) %>% 
+  gather(key = "gd", value = "wight", gd0_weight:gd18_weight) %>% 
+  mutate(gd = replace(gd, gd == "gd0_weight", "0")) %>% 
+  mutate(gd = replace(gd, gd == "gd18_weight", "18"))
+```
+
+## Use "spread" to untidy your data
+```{r}
+analysis_result = tibble(
+  group = c("treatment", "treatment", "placebo", "placebo"),
+  time = c("pre", "post", "pre", "post"),
+  mean = c(4, 8, 3.5, 4)
+)
+spread(analysis_result, key = time, value = mean)
+```
+
+## Binding rows from different tables
+
+first we need to read all three tables
+
+```{r read tables}
+fellowship_ring = readxl::read_excel("./data/LotR_Words.xlsx", range = "B3:D6") %>%
+  mutate(movie = "fellowship_ring")
+
+two_towers = readxl::read_excel("./data/LotR_Words.xlsx", range = "F3:H6") %>%
+  mutate(movie = "two_towers")
+
+return_king = readxl::read_excel("./data/LotR_Words.xlsx", range = "J3:L6") %>%
+  mutate(movie = "return_king")
+```
+
+it's time to bind them
+
+```{r}
+lotr_tidy = bind_rows(fellowship_ring, two_towers, return_king) %>% 
+  janitor::clean_names() %>% 
+  gather(key = sex, value = words, female:male) %>% 
+  mutate(race = tolower(race)) %>% 
+  select(movie, everything())
+```
+
+
+
