@@ -1,0 +1,11 @@
+---
+title: "tidy_data"
+author: "ymmyz"
+date: "10/1/2018"
+output: html_document
+---
+
+```{r pacakge_setup, include=FALSE}
+library(tidyverse)
+```
+

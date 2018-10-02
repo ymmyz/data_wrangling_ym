@@ -77,8 +77,35 @@ filter(litters_data, gd0_weight < 25)
 
 filter(pups_data, sex == 1)
 filter(pups_data, pd_walk < 11, sex == 2)
+
+filter(litters_data, !is.na(gd0_weight))
+
 ```
 
+## Mutate
 
+Create Variables
+
+```{r}
+mutate(litters_data,
+       wt_gain = gd18_weight - gd0_weight,    #Creatr New Variable, which will be added to the last column
+       group = tolower(group))
+
+mutate(litters_data,
+       wt_gain = gd18_weight - gd0_weight,   
+       wt_gain_squared = wt_gain ^ 2)
+```
+
+## Arrange
+
+Arrange the data
+
+```{r}
+arrange(litters_data, gd0_weight) # Arrange by gd0_weight
+
+arrange(litters_data, desc(pups_born_alive), gd0_weight)  # Use desc() for descending
+```
+
+ 
 
 
